@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Web Internet Radio Player</title>
+	<link rel="stylesheet" type="text/css" href="css/main.css" />
+</head>
+<body>
+	<div id="outer_div">
+		<header id="main_header">
+			<h1>Web Internet Radio Player</h1>
+		</header>
+
+		<section id="main_section">
+            <article>
+                <label for="radio_map">Radio Map</label>
+                <input id="radio_map" type="file" value="Add Radio Map" accept=".txt" />
+            </article>
+
+            <article>
+                <audio id="audio_radio" autoplay controls>
+                    Your browser doesn't support the audio tag
+                </audio>
+            </article>
+		</section>
+		
+		<footer id="main_footer">
+			Copyright Palaster 2024
+		</footer>
+	</div>
+
+    <script>
+        const radioMapInput = document.getElementById("radio_map"); 
+        const mainSection = document.getElementById("main_section");
+        const audioRadio = document.getElementById("audio_radio");
+        const radioMap = new Map();
+        var radioMapFile;
+        radioMapInput.style.opacity = 0;
+        radioMapInput.addEventListener("change", () => {
+            const currentFiles = radioMapInput.files;
+            if (currentFiles.length === 0) {
+                return;
+            }
+            for (const file of currentFiles) {
+                radioMapFile = file;
+                let fileReader = new FileReader();
+                fileReader.onload = () => {
+                    const nameAndURL = [];
+                    for (const line of fileReader.result.split(/\r?\n/)) {
+                        if (line.length <= 0) {
+                            continue;
+                        }
+                        if (line.startsWith("name=")) {
+                            nameAndURL.push(line.split("name=")[1]);
+                        }
+                        if (line.startsWith("url=")) {
+                            nameAndURL.push(line.split("url=")[1]);
+                        }
+                    }
+                    if (nameAndURL.length == 0 || nameAndURL.length % 2 != 0) {
+                        return;
+                    }
+                    for (var i = 0; i < nameAndURL.length; i += 2) {
+                        radioMap.set(nameAndURL[i], nameAndURL[i + 1]);
+                        let newArticle = document.createElement("article");
+                        newArticle.innerHTML = nameAndURL[i];
+                        newArticle.addEventListener("click", () => {
+                            audioRadio.src = radioMap.get(newArticle.innerHTML);
+                        });
+                        mainSection.appendChild(newArticle);
+                    }
+                };
+                fileReader.readAsText(file);
+            }
+        });
+    </script>
+</body>
+</html>
