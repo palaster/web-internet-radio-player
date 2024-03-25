@@ -14,8 +14,17 @@
 
 		<section id="main_section">
             <article>
-                <label for="radio_map">Radio Map</label>
-                <input id="radio_map" type="file" value="Add Radio Map" accept=".txt" />
+                <label for="load_radio_map">Load Radio Map</label>
+                <input id="load_radio_map" type="file" value="Load Radio Map" accept=".txt" /><br />
+                <input id="save_radio_map" type="button" value="Save Radio Map" />
+            </article>
+
+            <article>
+                <label for="new_radio_name">New Radio Name</label>
+                <input id="new_radio_name" type="text" /><br />
+                <label for="new_radio_url">New Radio URL</label>
+                <input id="new_radio_url" type="url" /><br />
+                <input id="new_radio_button" type="button" value="Add New Radio" />
             </article>
 
             <article>
@@ -31,19 +40,53 @@
 	</div>
 
     <script>
-        const radioMapInput = document.getElementById("radio_map"); 
         const mainSection = document.getElementById("main_section");
+
+        const loadRadioMap = document.getElementById("load_radio_map"); 
+        const saveRadioMap = document.getElementById("save_radio_map");
+
+        const newRadioNameInput = document.getElementById("new_radio_name");
+        const newRadioURLInput = document.getElementById("new_radio_url"); 
+        const newRadioButton = document.getElementById("new_radio_button");
+
         const audioRadio = document.getElementById("audio_radio");
+        
         const radioMap = new Map();
-        var radioMapFile;
-        radioMapInput.style.opacity = 0;
-        radioMapInput.addEventListener("change", () => {
-            const currentFiles = radioMapInput.files;
+        const radioElements = [];
+
+        loadRadioMap.style.opacity = 0;
+
+        function clearEntries() {
+            for (element of radioElements) {
+                element.remove();
+            }
+            radioElements.length = 0;
+        }
+
+        function createRadioArticle(radioName, radioURL) {
+            if (!radioName || !radioURL) {
+                return;
+            }
+            radioMap.set(radioName, radioURL);
+            let newArticle = document.createElement("article");
+            radioElements.push(newArticle);
+            newArticle.innerHTML = radioName;
+            newArticle.addEventListener("click", () => {
+                let url = radioMap.get(newArticle.innerHTML);
+                if (audioRadio.src != url) {
+                    audioRadio.src = url;
+                }
+            });
+            mainSection.appendChild(newArticle);
+        }
+
+        loadRadioMap.addEventListener("change", () => {
+            clearEntries();
+            const currentFiles = loadRadioMap.files;
             if (currentFiles.length === 0) {
                 return;
             }
             for (const file of currentFiles) {
-                radioMapFile = file;
                 let fileReader = new FileReader();
                 fileReader.onload = () => {
                     const nameAndURL = [];
@@ -62,17 +105,34 @@
                         return;
                     }
                     for (var i = 0; i < nameAndURL.length; i += 2) {
-                        radioMap.set(nameAndURL[i], nameAndURL[i + 1]);
-                        let newArticle = document.createElement("article");
-                        newArticle.innerHTML = nameAndURL[i];
-                        newArticle.addEventListener("click", () => {
-                            audioRadio.src = radioMap.get(newArticle.innerHTML);
-                        });
-                        mainSection.appendChild(newArticle);
+                        createRadioArticle(nameAndURL[i], nameAndURL[i + 1]);
                     }
                 };
                 fileReader.readAsText(file);
             }
+        });
+        saveRadioMap.addEventListener("click", () => {
+            let radioMapString = "";
+            radioMap.forEach((value, key) => {
+                radioMapString += ("name=" + key + "\n");
+                radioMapString += ("url=" + value + "\n");
+            });
+            if (!radioMapString) {
+                return;
+            }
+            let updatedRadioMap = new File([radioMapString], "radio_map.txt");
+            let element = document.createElement("a");
+            element.setAttribute("href", URL.createObjectURL(updatedRadioMap));
+            element.setAttribute("download", "radio_map.txt");
+            element.style.display = "none";
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            URL.revokeObjectURL(updatedRadioMap);
+        });
+
+        newRadioButton.addEventListener("click", () => {
+            createRadioArticle(newRadioNameInput.value, newRadioURLInput.value);
         });
     </script>
 </body>
