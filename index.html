@@ -14,8 +14,8 @@
 
 		<section id="main_section">
             <article>
-                <label for="load_radio_map">Load Radio Map</label>
-                <input id="load_radio_map" type="file" value="Load Radio Map" accept=".txt" /><br />
+                <input id="load_radio_map_button" type="button" value="Load Radio Map" />
+                <input id="load_radio_map" type="file" accept=".txt" /><br />
                 <input id="save_radio_map" type="button" value="Save Radio Map" />
             </article>
 
@@ -42,7 +42,8 @@
     <script>
         const mainSection = document.getElementById("main_section");
 
-        const loadRadioMap = document.getElementById("load_radio_map"); 
+        const loadRadioButtonMap = document.getElementById("load_radio_map_button");
+        const loadRadioMap = document.getElementById("load_radio_map");
         const saveRadioMap = document.getElementById("save_radio_map");
 
         const newRadioNameInput = document.getElementById("new_radio_name");
@@ -94,6 +95,10 @@
             });
             mainSection.appendChild(newArticle);
         }
+
+        loadRadioButtonMap.addEventListener("click", () => {
+            loadRadioMap.click();
+        });
 
         loadRadioMap.addEventListener("change", () => {
             clearEntries();
