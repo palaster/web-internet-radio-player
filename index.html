@@ -70,9 +70,24 @@
             radioMap.set(radioName, radioURL);
             let newArticle = document.createElement("article");
             radioElements.push(newArticle);
+            newArticle.id = radioName;
             newArticle.innerHTML = radioName;
+
+            let deleteButton = document.createElement("button");
+            deleteButton.innerHTML = "Delete";
+            deleteButton.addEventListener("click", () => {
+                if (deleteButton.parentElement) {
+                    let parentRadioName = deleteButton.parentElement.id;
+                    if (parentRadioName) {
+                        radioMap.delete(parentRadioName);
+                    }
+                    deleteButton.parentElement.remove();
+                }
+            });
+            newArticle.appendChild(deleteButton);
+
             newArticle.addEventListener("click", () => {
-                let url = radioMap.get(newArticle.innerHTML);
+                let url = radioMap.get(newArticle.id);
                 if (audioRadio.src != url) {
                     audioRadio.src = url;
                 }
